@@ -25,6 +25,10 @@ public class HomeController : Controller
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         // var newsResponse = JsonSerializer.Deserialize<NewsResponse>(json, options);
         var articles = new List<Article>();
+        articles.Add(new Article("CNN", "Article 1", "https://www.cnn.com/article1"));
+        articles.Add(new Article("BBC", "Article 2", "https://www.bbc.com/article2"));
+        articles.Add(new Article("Reuters", "Article 3", "https://www.reuters.com/article3"));
+  
         return View(articles);
     }
 

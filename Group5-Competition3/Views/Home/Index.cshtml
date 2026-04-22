@@ -1,8 +1,27 @@
-﻿@{
+﻿@model List<Article>
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-4">
+    <h1 class="display-5 mb-4">Top Business Headlines</h1>
+
+    @if (Model == null || !Model.Any())
+    {
+        <p>No articles found.</p>
+    }
+    else
+    {
+        <ul class="list-group">
+            @foreach (var article in Model)
+            {
+                <li class="list-group-item">
+                    <div><strong>@article.NewsSourceName</strong></div>
+                    <div>@article.Title</div>
+                    <a href="@article.ArticleURL" target="_blank" rel="noopener noreferrer">Read more</a>
+                </li>
+            }
+        </ul>
+    }
 </div>
