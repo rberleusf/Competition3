@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using Group5_Competition3.Models;
 
@@ -12,31 +13,37 @@ public class HomeController : Controller
     public HomeController(IHttpClientFactory httpClientFactory)
     {
         _httpClient = httpClientFactory.CreateClient();
+        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Group5-Competition3/1.0");
     }
 
     public async Task<IActionResult> Index()
     {
-        string apiUrl = "https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=fccc77c150454041886544b58f106d86";
+        string apiUrl = "https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=fd4dc9ca9b6145a9b6102df851dcf93e";
 
         HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
-        string json = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            ViewData["ErrorMessage"] = "Unable to load articles at this time.";
+            return View(new List<Article>());
+        }
 
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        // var newsResponse = JsonSerializer.Deserialize<NewsResponse>(json, options);
-        var articles = new List<Article>();
+        var root = await response.Content.ReadFromJsonAsync<JsonElement>(options);
 
-        using var doc = JsonDocument.Parse(json);
-        var articlesArray = doc.RootElement.GetProperty("articles");
+        var newsArticles = root.TryGetProperty("articles", out var arr)
+            ? JsonSerializer.Deserialize<List<NewsApiArticle>>(arr.GetRawText(), options) ?? new()
+            : new();
 
-        foreach (var item in articlesArray.EnumerateArray())
-        {
-            articles.Add(new Article
-            {
-                NewsSourceName = item.GetProperty("source").GetProperty("name").GetString(),
-                Title = item.GetProperty("title").GetString(),
-                ArticleURL = item.GetProperty("url").GetString()
-            });
-        }
+        var articles = newsArticles
+            .Select(a => new Article(
+                a.Source?.Name ?? string.Empty,
+                a.Title ?? string.Empty,
+                a.Url ?? string.Empty,
+                a.Description ?? string.Empty,
+                a.UrlToImage ?? string.Empty))
+            .Take(10)
+            .ToList();
 
         return View(articles);
     }

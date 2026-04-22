@@ -1,27 +1,50 @@
 ﻿@model List<Article>
 
-@{
-    ViewData["Title"] = "Home Page";
-}
+<div class="bg-dark text-white py-3 mb-4">
+    <div class="container">
+        <h1 class="mb-0">Latest News</h1>
+    </div>
+</div>
 
-<div class="container py-4">
-    <h1 class="display-5 mb-4">Top Business Headlines</h1>
+<div class="container my-4">
+    <h2 class="mb-1">Top Business News</h2>
+    <p class="text-muted mb-4">Showing the top 10 business headlines sourced from <a href="https://newsapi.org" target="_blank">News API</a>.</p>
 
-    @if (Model == null || !Model.Any())
+    @if (ViewData["ErrorMessage"] != null)
     {
-        <p>No articles found.</p>
+        <div class="alert alert-warning">@ViewData["ErrorMessage"]</div>
     }
-    else
-    {
-        <ul class="list-group">
-            @foreach (var article in Model)
-            {
-                <li class="list-group-item">
-                    <div><strong>@article.NewsSourceName</strong></div>
-                    <div>@article.Title</div>
-                    <a href="@article.ArticleURL" target="_blank" rel="noopener noreferrer">Read more</a>
-                </li>
-            }
-        </ul>
-    }
+
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var article in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header fw-semibold">
+                        @article.Title
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex gap-3">
+                            @if (!string.IsNullOrEmpty(article.ImageUrl))
+                            {
+                                <img src="@article.ImageUrl" alt="Article thumbnail"
+                                     style="width:90px;height:90px;object-fit:cover;border-radius:6px;flex-shrink:0;" />
+                            }
+                            <div>
+                                <p class="card-text mb-1"><strong>@article.NewsSourceName</strong></p>
+                                @if (!string.IsNullOrEmpty(article.Description))
+                                {
+                                    <p class="card-text text-muted small mb-2">@article.Description</p>
+                                }
+                                <a href="@article.ArticleURL" target="_blank"
+                                   class="card-link text-decoration-underline">
+                                    Read Full Article
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 </div>
