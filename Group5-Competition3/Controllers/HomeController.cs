@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Group5_Competition3.Models;
-using System.Xml.Schema;
 
 namespace Group5_Competition3.Controllers;
 
@@ -22,9 +21,21 @@ public class HomeController : Controller
         HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
         string json = await response.Content.ReadAsStringAsync();
 
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        // var newsResponse = JsonSerializer.Deserialize<NewsResponse>(json, options);
         var articles = new List<Article>();
+
+        using var doc = JsonDocument.Parse(json);
+        var articlesArray = doc.RootElement.GetProperty("articles");
+
+        foreach (var item in articlesArray.EnumerateArray())
+        {
+            articles.Add(new Article
+            {
+                NewsSourceName = item.GetProperty("source").GetProperty("name").GetString(),
+                Title = item.GetProperty("title").GetString(),
+                ArticleURL = item.GetProperty("url").GetString()
+            });
+        }
+
         return View(articles);
     }
 
