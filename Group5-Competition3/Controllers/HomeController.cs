@@ -21,6 +21,8 @@ public class HomeController : Controller
         HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
         string json = await response.Content.ReadAsStringAsync();
 
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        // var newsResponse = JsonSerializer.Deserialize<NewsResponse>(json, options);
         var articles = new List<Article>();
 
         using var doc = JsonDocument.Parse(json);
